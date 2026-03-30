@@ -20,7 +20,7 @@ SMALL_GENERATORS  = INT_GENERATORS
 MEDIUM_GENERATORS = INT_GENERATORS
 LARGE_GENERATORS  = INT_GENERATORS
 
-OUTPUT_FILE = "results.csv"
+OUTPUT_FILE = "results/results.csv"
 
 #runner
 
@@ -58,6 +58,7 @@ def run_experiment(config, generators, algorithms=None):
                 if avg_time >= 0:
                     print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
                           f"{avg_time*1000:10.4f} ms  (avg of {n_runs} runs)")
+                    #the avg time will be represented in milliseconds
                 else:
                     print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
                           f"RECURSION ERROR")
