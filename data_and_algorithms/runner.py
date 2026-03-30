@@ -14,7 +14,7 @@ MEDIUM_CONFIG = {"sizes":  [1000, 5000, 10000, 50000],
 
 LARGE_CONFIG = {"sizes":   [100_000, 500_000, 1_000_000],
                 "runs":    3,
-                "algorithms": ONLY_QUICKSORT}
+                "algorithms": FASTER_ALGORITHMS}
 
 SMALL_GENERATORS  = INT_GENERATORS
 MEDIUM_GENERATORS = INT_GENERATORS
@@ -25,10 +25,7 @@ OUTPUT_FILE = "results.csv"
 #runner
 
 def run_experiment(config, generators, algorithms=None):
-    """
-    Runs one tier of the experiment at a time
-    Returns a list of result rows
-    """
+
     if algorithms is None:
         algorithms = ALGORITHMS
 
