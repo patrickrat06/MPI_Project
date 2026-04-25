@@ -4,7 +4,7 @@ import sys
 
 #safety measure - python's recursion limit is 1000 and quick sort can surpass that on reversed/sorted lists
 #therefore, the limit must be raised
-sys.setrecursionlimit(50000)
+sys.setrecursionlimit(10000)
 
 # SORTING ALGORITHMS
 
@@ -165,15 +165,14 @@ ONLY_QUICKSORT = {"Quick Sort":quick_sort}
 #BENCHMARK
 
 def benchmark(algorithm_fn, data, n_runs=1):
-    """
-    works on copies of data so that it keeps the original data unchanged
-    returns average time in seconds
-    """
     total_time = 0.0
+    stop = False
     for _ in range(n_runs):
         arr_copy = data.copy()
         start = time.perf_counter()
         algorithm_fn(arr_copy)
+        if time.perf_counter() > 30:
+            stop = True
         end = time.perf_counter()
         total_time += (end - start)
     return total_time / n_runs

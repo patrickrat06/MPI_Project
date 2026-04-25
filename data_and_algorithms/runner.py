@@ -7,7 +7,7 @@ from sorting import ALGORITHMS, FASTER_ALGORITHMS, NO_QUICKSORT, FASTER_ALG_NO_Q
 #experiment configuration
 
 SMALL_CONFIG = {"sizes":  [20, 30, 50, 100],
-                "runs":   10000}
+                "runs":   100000}
 
 MEDIUM_CONFIG = {"sizes":  [1000, 5000, 10000, 50000],
                 "runs":   10}
@@ -16,9 +16,9 @@ LARGE_CONFIG = {"sizes":   [100_000, 500_000, 1_000_000],
                 "runs":    3,
                 "algorithms": FASTER_ALGORITHMS}
 
-SMALL_GENERATORS  = INT_GENERATORS
-MEDIUM_GENERATORS = INT_GENERATORS
-LARGE_GENERATORS  = INT_GENERATORS
+SMALL_GENERATORS  = FLOAT_GENERATORS
+MEDIUM_GENERATORS = FLOAT_GENERATORS
+LARGE_GENERATORS  = FLOAT_GENERATORS
 
 OUTPUT_FILE = "results/results.csv"
 
@@ -36,6 +36,7 @@ def run_experiment(config, generators, algorithms=None):
     for size in sizes:
         for struct_name, gen_fn in generators.items():
             data = gen_fn(size)
+            print(data)
 
             for alg_name, alg_fn in algorithms.items():
                 try:
@@ -43,7 +44,7 @@ def run_experiment(config, generators, algorithms=None):
                 except RecursionError:
                     avg_time = -1
                     print(f"  [RecursionError] {alg_name} on {struct_name}, size={size}")
-                    #quick Sort on sorted/reverse data can hit the recursion limit so exception is needed
+                    #quick Sort can hit the recursion limit in some cases so exception is needed
 
                 row = {
                     "algorithm": alg_name,
@@ -57,7 +58,7 @@ def run_experiment(config, generators, algorithms=None):
                 #printing results as they come in
                 if avg_time >= 0:
                     print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
-                          f"{avg_time*1000:10.4f} ms  (avg of {n_runs} runs)")
+                          f"{avg_time*1000:10.4f} ms | {n_runs} runs)")
                     #the avg time will be represented in milliseconds
                 else:
                     print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
@@ -70,7 +71,7 @@ def save_results(rows, filename):
     if not rows:
         return
     fieldnames = list(rows[0].keys())
-    with open(filename, "w", newline="") as f:
+    with open(filename, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
@@ -81,13 +82,13 @@ def save_results(rows, filename):
 if __name__ == "__main__":
     all_rows = []
 
-    # print("~" * 11)
-    # print("SMALL SIZES")
-    # all_rows += run_experiment(SMALL_CONFIG, SMALL_GENERATORS)
+    print("~" * 11)
+    print("SMALL SIZES")
+    all_rows += run_experiment(SMALL_CONFIG, SMALL_GENERATORS)
 
-    # print("\n" + "~" * 12)
-    # print("MEDIUM SIZES")
-    # all_rows += run_experiment(MEDIUM_CONFIG, MEDIUM_GENERATORS)
+    print("\n" + "~" * 12)
+    print("MEDIUM SIZES")
+    all_rows += run_experiment(MEDIUM_CONFIG, MEDIUM_GENERATORS)
 
     print("\n" + "~" * 11)
     print("LARGE SIZES")
