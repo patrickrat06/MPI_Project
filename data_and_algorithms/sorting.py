@@ -1,9 +1,8 @@
 
 import time
 import sys
+from multiprocessing import Process, Queue
 
-#safety measure - python's recursion limit is 1000 and quick sort can surpass that on reversed/sorted lists
-#therefore, the limit must be raised
 sys.setrecursionlimit(10000)
 
 # SORTING ALGORITHMS
@@ -184,17 +183,29 @@ FASTER_ALG_NO_QUICKSORT = {"Heap Sort":heapSort,
 
 ONLY_QUICKSORT = {"Quick Sort":quick_sort}
 
-#BENCHMARK
 
-def benchmark(algorithm_fn, data, n_runs=1):
+def _sorter(alg_fn, data, n_runs, queue):
     total_time = 0.0
-    stop = False
     for _ in range(n_runs):
         arr_copy = data.copy()
         start = time.perf_counter()
-        algorithm_fn(arr_copy)
-        if time.perf_counter() > 30:
-            stop = True
+        alg_fn(arr_copy)
         end = time.perf_counter()
         total_time += (end - start)
-    return total_time / n_runs
+    queue.put(total_time / n_runs)
+
+
+def benchmark(alg_fn, data, n_runs=1, timeout=120):
+    #Kills the sort and returns None if it exceeds `timeout` seconds.
+    queue = Queue()
+    process = Process(target=_sorter, args=(alg_fn, data, n_runs, queue))
+    process.start()
+    process.join(timeout=timeout)  # wait up to `timeout` seconds
+
+    if process.is_alive():
+        # Still running — force-kill it and report timeout.
+        process.terminate()
+        process.join()
+        return None
+
+    return queue.get()

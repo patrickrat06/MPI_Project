@@ -1,10 +1,12 @@
 
 import csv
 #import time
-from generator import INT_GENERATORS, FLOAT_GENERATORS, STRING_GENERATORS
+from generator import INT_GENERATORS, FLOAT_GENERATORS, STRING_GENERATORS, SEED
 from sorting import ALGORITHMS, FASTER_ALGORITHMS, NO_QUICKSORT, FASTER_ALG_NO_QUICKSORT, ONLY_QUICKSORT, benchmark
 
 #experiment configuration
+
+TIMEOUT_SECONDS = 300
 
 SMALL_CONFIG = {"sizes":  [20, 30, 50, 100],
                 "runs":   100000}
@@ -36,46 +38,44 @@ def run_experiment(config, generators, algorithms=None):
     for size in sizes:
         for struct_name, gen_fn in generators.items():
             data = gen_fn(size)
-            print(data)
 
             for alg_name, alg_fn in algorithms.items():
-                try:
-                    avg_time = benchmark(alg_fn, data, n_runs=n_runs)
-                except RecursionError:
-                    avg_time = -1
-                    print(f"  [RecursionError] {alg_name} on {struct_name}, size={size}")
-                    #quick Sort can hit the recursion limit in some cases so exception is needed
+                avg_time = benchmark(alg_fn, data, n_runs=n_runs, timeout=TIMEOUT_SECONDS)
+                # benchmark() returns None if the timeout was hit,
+                # or a float (seconds) if it completed in time.
+
+                timed_out = (avg_time is None)
 
                 row = {
                     "algorithm": alg_name,
                     "structure": struct_name,
                     "size": size,
                     "runs": n_runs,
-                    "avg_time_s": round(avg_time, 9),
-                    "avg_time_ms": round(avg_time * 1000, 6)}
+                    "avg_time_s": round(avg_time, 9) if not timed_out else "TIMEOUT",
+                    "avg_time_ms": round(avg_time * 1000, 6) if not timed_out else "TIMEOUT",
+                    "timed_out": timed_out,
+                    "seed": SEED,}
                 rows.append(row)
 
                 #printing results as they come in
-                if avg_time >= 0:
-                    print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
-                          f"{avg_time*1000:10.4f} ms | {n_runs} runs)")
-                    #the avg time will be represented in milliseconds
+                if timed_out:
+                    print(f" {'TIMEOUT':15} | {alg_name:15} | {struct_name:20} | "
+                          f"size={size:>8,} (>{TIMEOUT_SECONDS}s)")
                 else:
-                    print(f"  {alg_name:15} | {struct_name:20} | size={size:>8,} | "
-                          f"RECURSION ERROR")
+                    print(f" {alg_name:15} | {struct_name:20} | size={size:>8,} | "
+                          f"{avg_time * 1000:10.4f} ms | {n_runs} runs")
 
     return rows
-
 
 def save_results(rows, filename):
     if not rows:
         return
     fieldnames = list(rows[0].keys())
-    with open(filename, "a", newline="") as f:
+    with open(filename, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
-    print(f"\nResults saved to {filename}")
+    print(f"\nResults saved to {filename}  (seed: {SEED})")
 
 #main
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     all_rows = []
 
     print("~" * 11)
-    print("SMALL SIZES")
+    print("SMALL SIZES (seed: {SEED})")
     all_rows += run_experiment(SMALL_CONFIG, SMALL_GENERATORS)
 
     print("\n" + "~" * 12)
