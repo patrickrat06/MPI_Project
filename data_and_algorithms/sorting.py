@@ -84,7 +84,28 @@ def mergeSort(arr, l, r):
 
 #quick sort
 
-def partition(arr, low, high):
+def _median_of_three(arr, low, high):
+    """
+    Finds the median of arr[low], arr[mid], arr[high].
+    Physically places it at arr[high] so the rest of partition() is unchanged.
+    Returns the pivot value.
+    """
+    mid = (low + high) // 2
+
+    if arr[low] > arr[mid]:
+        arr[low], arr[mid] = arr[mid], arr[low]
+    if arr[low] > arr[high]:
+        arr[low], arr[high] = arr[high], arr[low]
+    if arr[mid] > arr[high]:
+        arr[mid], arr[high] = arr[high], arr[mid]
+
+    arr[mid], arr[high] = arr[high], arr[mid]
+    return arr[high]
+
+
+def partition_mot(arr, low, high):
+    """Partition using median-of-three pivot."""
+    _median_of_three(arr, low, high)
     pivot = arr[high]
     i = low - 1
     for j in range(low, high):
@@ -94,9 +115,10 @@ def partition(arr, low, high):
     arr[i + 1], arr[high] = arr[high], arr[i + 1]
     return i + 1
 
+
 def quickSort(arr, low, high):
     if low < high:
-        p = partition(arr, low, high)
+        p = partition_mot(arr, low, high)
         quickSort(arr, low, p - 1)
         quickSort(arr, p + 1, high)
 
