@@ -2,6 +2,10 @@
 import random
 import string
 
+#added seed system for experiment reproducibility
+SEED = 1
+random.seed(SEED)
+
 #integer generating
 
 def generate_random_int(size, min_val=0, max_val=10000):
@@ -75,6 +79,7 @@ STRING_GENERATORS = {"random_string": generate_random_strings,
 #test
 
 if __name__ == "__main__":
+    print(f"Seed: {SEED}\n")
     for name, fn in INT_GENERATORS.items():
         sample = fn(10)
-        print(f"{name:15} -> {sample}")
+        print(f"{name:20} -> {sample}")
