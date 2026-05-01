@@ -3,7 +3,7 @@ import random
 import string
 
 #added seed system for experiment reproducibility
-SEED = 1
+SEED = 2
 random.seed(SEED)
 
 #integer generating
@@ -81,5 +81,11 @@ STRING_GENERATORS = {"random_string": generate_random_strings,
 if __name__ == "__main__":
     print(f"Seed: {SEED}\n")
     for name, fn in INT_GENERATORS.items():
+        sample = fn(10)
+        print(f"{name:20} -> {sample}")
+    for name, fn in FLOAT_GENERATORS.items():
+        sample = fn(10)
+        print(f"{name:20} -> {sample}")
+    for name, fn in STRING_GENERATORS.items():
         sample = fn(10)
         print(f"{name:20} -> {sample}")
